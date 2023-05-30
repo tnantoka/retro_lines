@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/sprite.dart';
 
 enum PlayerType {
@@ -34,6 +35,7 @@ class Player extends PositionComponent with HasGameRef {
 
   late final double _groundY;
   late final SpriteAnimationComponent _sprite;
+  late final SpriteSheet _spriteSheet;
 
   var vx = 0.0;
   var vy = 0.0;
@@ -48,6 +50,38 @@ class Player extends PositionComponent with HasGameRef {
       anchor: Anchor.center,
     );
     await add(_sprite);
+
+    final image = await game.images.load('Retro-Lines-Player-transparent.png');
+
+    final pixels = await image.pixelsInUint8();
+    for (var i = 0; i < pixels.length; i += 4) {
+      final r = pixels[i];
+      final g = pixels[i + 1];
+      final b = pixels[i + 2];
+      final a = pixels[i + 3];
+      final color = Color.fromARGB(a, r, g, b);
+
+      if (color == const Color.fromARGB(255, 255, 77, 237) ||
+          color == const Color.fromARGB(255, 237, 77, 255)) {
+        pixels[i] = 255;
+        pixels[i + 1] = 0;
+        pixels[i + 2] = 0;
+        pixels[i + 3] = 255;
+      } else if (color == const Color.fromARGB(255, 255, 255, 0) ||
+          color == const Color.fromARGB(255, 0, 255, 255)) {
+        pixels[i] = 0;
+        pixels[i + 1] = 255;
+        pixels[i + 2] = 0;
+        pixels[i + 3] = 255;
+      }
+    }
+    final replacedImage =
+        await ImageExtension.fromPixels(pixels, image.width, image.height);
+
+    _spriteSheet = SpriteSheet(
+      image: replacedImage,
+      srcSize: Vector2.all(16),
+    );
 
     _updateAnimation();
   }
@@ -143,14 +177,7 @@ class Player extends PositionComponent with HasGameRef {
   }
 
   void _updateAnimation() async {
-    final image = await game.images.load('Retro-Lines-Player-transparent.png');
-
-    final spritesheet = SpriteSheet(
-      image: image,
-      srcSize: Vector2.all(16),
-    );
-
-    _sprite.animation = spritesheet.createAnimation(
+    _sprite.animation = _spriteSheet.createAnimation(
       row: _row(),
       from: _from(),
       to: _to(),
