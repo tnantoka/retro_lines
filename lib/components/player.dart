@@ -45,9 +45,9 @@ class Player extends PositionComponent with HasGameRef {
     super.onLoad();
 
     _sprite = SpriteAnimationComponent(
-      position: Vector2.zero(),
+      position: Vector2(0, -64),
       size: Vector2.all(64),
-      anchor: Anchor.center,
+      anchor: Anchor.topCenter,
     );
     await add(_sprite);
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -16,28 +15,34 @@ class MainGame extends FlameGame with KeyboardEvents {
   Future<void> onLoad() async {
     super.onLoad();
 
-    await add(
-      RectangleComponent(
-        size: Vector2(size.x, 1),
-        position: Vector2(0, size.y * 0.5),
-      ),
-    );
-    await add(
-      RectangleComponent(
-        size: Vector2(1, size.y),
-        position: Vector2(size.x * 0.5, 0),
-      ),
-    );
+    final map = Map();
+    await add(map);
 
     await add(
       _playerLarge = Player(
-        position: Vector2(size.x * 0.5, size.y * 0.5),
+        position: Vector2(
+          size.x * 0.5,
+          map.height * 0.5,
+        ),
       ),
     );
     await add(
       _playerSmall = Player(
-        position: Vector2(size.x * 0.5, size.y * 0.6),
+        position: Vector2(
+          size.x * 0.4,
+          map.height * 0.5,
+        ),
         type: PlayerType.small,
+      ),
+    );
+
+    camera.followComponent(
+      _playerLarge,
+      worldBounds: Rect.fromLTWH(
+        0,
+        0,
+        map.width,
+        map.height,
       ),
     );
   }
